@@ -1,0 +1,197 @@
+HW3 
+Database: epidemiology
+Collection: infectious_diseases (164,433 records)
+Contributions: Sahana Dhar
+-------------------------------------------------------------------------------------------
+Question 1: What does a typical record in this dataset look like?
+Query: 
+db.infectious_diseases.findOne()
+
+RESULT:
+{
+  _id: ObjectId('699ddc66f6f3d100e90af0b3'),
+  disease: 'Amebiasis',
+  location: { county: 'Alameda', state: 'California' },
+  demographics: { sex: 'Female', year: 2001 },
+  stats: {
+    cases: 7,
+    population: 746596,
+    rate: '0.938*',
+    confidence_interval: { lower_95: 0.377, upper_95: 1.932 }
+  }
+}
+
+
+
+Question 2: What do Salmonellosis case reports look like across counties?
+
+Query: 
+db.infectious_diseases.find({"disease": "Salmonellosis"}).limit(5)
+
+RESULT:
+[
+  { disease: 'Salmonellosis', location: { county: 'Alameda', state: 'California' },
+    demographics: { sex: 'Male', year: 2001 }, stats: { cases: 111, population: 718968, rate: '15.439' } },
+  { disease: 'Salmonellosis', location: { county: 'Alameda', state: 'California' },
+    demographics: { sex: 'Total', year: 2001 }, stats: { cases: 224, population: 1465564, rate: '15.284' } },
+  { disease: 'Salmonellosis', location: { county: 'Alameda', state: 'California' },
+    demographics: { sex: 'Female', year: 2002 }, stats: { cases: 107, population: 747987, rate: '14.305' } },
+  { disease: 'Salmonellosis', location: { county: 'Alameda', state: 'California' },
+    demographics: { sex: 'Total', year: 2002 }, stats: { cases: 250, population: 1468468, rate: '17.025' } },
+  { disease: 'Salmonellosis', location: { county: 'Alameda', state: 'California' },
+    demographics: { sex: 'Male', year: 2002 }, stats: { cases: 139, population: 720481, rate: '19.293' } }
+]
+
+Question 3: What diseases are being reported in Los Angeles County? 
+Query: 
+db.infectious_diseases.find({"location.county": "Los Angeles"}).limit(5)
+
+RESULT:
+[
+  { disease: 'Amebiasis', location: { county: 'Los Angeles' }, demographics: { sex: 'Female', year: 2001 }, stats: { cases: 54, rate: '1.107' } },
+  { disease: 'Amebiasis', location: { county: 'Los Angeles' }, demographics: { sex: 'Total', year: 2001 }, stats: { cases: 148, rate: '1.536' } },
+  { disease: 'Amebiasis', location: { county: 'Los Angeles' }, demographics: { sex: 'Female', year: 2002 }, stats: { cases: 54, rate: '1.097' } },
+  { disease: 'Amebiasis', location: { county: 'Los Angeles' }, demographics: { sex: 'Male', year: 2002 }, stats: { cases: 65, rate: '1.355' } },
+  { disease: 'Amebiasis', location: { county: 'Los Angeles' }, demographics: { sex: 'Total', year: 2002 }, stats: { cases: 120, rate: '1.234' } }
+]
+
+
+
+Question 4: Which disease outbreaks were large enough to be considered significant (over 500 cases)? 
+Query: 
+db.infectious_diseases.find({"stats.cases": {$gt: 500}}).limit(5)
+
+RESULT:
+[
+  { disease: 'Amebiasis', location: { county: 'California' }, demographics: { sex: 'Total', year: 2001 }, stats: { cases: 570 } },
+  { disease: 'Campylobacteriosis', location: { county: 'Alameda' }, demographics: { sex: 'Total', year: 2017 }, stats: { cases: 537 } },
+  { disease: 'Campylobacteriosis', location: { county: 'Alameda' }, demographics: { sex: 'Total', year: 2018 }, stats: { cases: 538 } },
+  { disease: 'Campylobacteriosis', location: { county: 'California' }, demographics: { sex: 'Female', year: 2001 }, stats: { cases: 2463 } },
+  { disease: 'Campylobacteriosis', location: { county: 'California' }, demographics: { sex: 'Male', year: 2001 }, stats: { cases: 3053 } }
+]
+
+Question 5: Which counties carry the highest burden of Salmonellosis?
+Query: 
+db.infectious_diseases.aggregate([
+  {$match: {"disease": "Salmonellosis"}},
+  {$group: {_id: "$location.county", total_cases: {$sum: "$stats.cases"}}},
+  {$sort: {total_cases: -1}},
+  {$limit: 10}
+])
+
+RESULT:
+[
+  { _id: 'California', total_cases: 183483 },
+  { _id: 'Los Angeles', total_cases: 45436 },
+  { _id: 'San Diego', total_cases: 18517 },
+  { _id: 'Orange', total_cases: 13447 },
+  { _id: 'Santa Clara', total_cases: 11501 },
+  { _id: 'Alameda', total_cases: 9222 },
+  { _id: 'San Bernardino', total_cases: 8088 },
+  { _id: 'Riverside', total_cases: 7243 },
+  { _id: 'Sacramento', total_cases: 6139 },
+  { _id: 'Fresno', total_cases: 5441 }
+]
+
+
+Question 6: Which infectious diseases have the highest total case counts in California? 
+Query: 
+db.infectious_diseases.aggregate([
+  {$group: {_id: "$disease", total_cases: {$sum: "$stats.cases"}}},
+  {$sort: {total_cases: -1}},
+  {$limit: 10}
+])
+
+RESULT:
+[
+  { _id: 'Campylobacteriosis', total_cases: 515687 },
+  { _id: 'Salmonellosis', total_cases: 365234 },
+  { _id: 'Coccidioidomycosis', total_cases: 294224 },
+  { _id: 'Giardiasis', total_cases: 165305 },
+  { _id: 'Shigellosis', total_cases: 145101 },
+  { _id: 'Shiga toxin-producing E. coli (STEC) without HUS', total_cases: 54206 },
+  { _id: 'Cryptosporidiosis', total_cases: 28558 },
+  { _id: 'Amebiasis', total_cases: 27265 },
+  { _id: 'Legionellosis', total_cases: 19007 },
+  { _id: 'Vibrio Infection (non-Cholera)', total_cases: 12159 }
+]
+
+
+Question 7: Is Lyme Disease becoming more common in California over time? 
+Query:
+db.infectious_diseases.aggregate([
+  {$match: {"disease": "Lyme Disease"}},
+  {$group: {_id: "$demographics.year", total_cases: {$sum: "$stats.cases"}}},
+  {$sort: {_id: 1}}
+])
+
+RESULT:
+[
+  { _id: 2001, total_cases: 336 },  { _id: 2002, total_cases: 357 },
+  { _id: 2003, total_cases: 296 },  { _id: 2004, total_cases: 184 },
+  { _id: 2005, total_cases: 370 },  { _id: 2006, total_cases: 330 },
+  { _id: 2007, total_cases: 338 },  { _id: 2008, total_cases: 254 },
+  { _id: 2009, total_cases: 398 },  { _id: 2010, total_cases: 352 },
+  { _id: 2011, total_cases: 401 },  { _id: 2012, total_cases: 328 },
+  { _id: 2013, total_cases: 484 },  { _id: 2014, total_cases: 353 },
+  { _id: 2015, total_cases: 505 },  { _id: 2016, total_cases: 592 },
+  { _id: 2017, total_cases: 696 },  { _id: 2018, total_cases: 451 },
+  { _id: 2019, total_cases: 461 }
+]
+
+
+Question 8: How did Campylobacteriosis case counts change during the 2010-2015 period? 
+Query:
+db.infectious_diseases.aggregate([
+  {$match: {"disease": "Campylobacteriosis", "demographics.sex": "Total", "location.county": "California"}},
+  {$group: {_id: "$demographics.year", total_cases: {$sum: "$stats.cases"}}},
+  {$sort: {_id: 1}},
+  {$match: {"_id": {$gte: 2010, $lte: 2015}}}
+])
+
+RESULT:
+[
+  { _id: 2010, total_cases: 6649 },
+  { _id: 2011, total_cases: 6759 },
+  { _id: 2012, total_cases: 8044 },
+  { _id: 2013, total_cases: 7696 },
+  { _id: 2014, total_cases: 7938 },
+  { _id: 2015, total_cases: 8353 }
+]
+
+
+Question 9: Are men or women more likely to contract Salmonellosis in California? 
+Query:
+db.infectious_diseases.aggregate([
+  {$match: {"disease": "Salmonellosis", "demographics.sex": {$in: ["Male", "Female"]}}},
+  {$group: {_id: "$demographics.sex", total_cases: {$sum: "$stats.cases"}}}
+])
+
+RESULT:
+[
+  { _id: 'Female', total_cases: 94304 },
+  { _id: 'Male', total_cases: 86584 }
+]
+
+
+Question 10: How widespread is Lyme Disease across California?
+Query: 
+db.infectious_diseases.aggregate([
+  {$match: {"disease": "Lyme Disease"}},
+  {$group: {_id: "$location.county", total_cases: {$sum: "$stats.cases"}}},
+  {$sort: {total_cases: -1}},
+  {$limit: 10}])
+
+RESULT:
+[
+  { _id: 'California', total_cases: 3849 },
+  { _id: 'Sonoma', total_cases: 344 },
+  { _id: 'Santa Cruz', total_cases: 287 },
+  { _id: 'San Diego', total_cases: 283 },
+  { _id: 'Santa Clara', total_cases: 256 },
+  { _id: 'Los Angeles', total_cases: 250 },
+  { _id: 'San Francisco', total_cases: 206 },
+  { _id: 'Humboldt', total_cases: 204 },
+  { _id: 'Alameda', total_cases: 198 },
+  { _id: 'Contra Costa', total_cases: 156 }
+]
