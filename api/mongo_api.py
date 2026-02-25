@@ -83,6 +83,7 @@ def get_disease_trend(disease, years=5):
 
     return list(collection.aggregate(pipeline))  #???????????????? visualize this one
 
+
 '''
 returns: given county's most prevelant diseases (3 default)
 '''
@@ -111,9 +112,17 @@ def get_county_disease(county, num=3):
     return list(collection.aggregate(pipeline))
 
 
-
 if __name__ == "__main__":
     # test methods
-    print(get_disease_trend("Salmonellosis"))
-    print(get_affected_counties("Amebiasis"))
-    print(get_county_disease("Alameda"))
+
+    print("Top 5 Counties Affected by Amebiasis Disease")
+    for r in get_affected_counties("Amebiasis", 5):
+        print(f"  {r['_id']}: {r['total_cases']} cases")
+
+    print("Salmonellosis Trends over 5 years")
+    for r in get_disease_trend("Salmonellosis", 5):
+        print(f"  {r['_id']}: {r['total_cases']} cases")
+
+    print("Top 5 Dieases in Alameda")
+    for r in get_county_disease("Alameda", 5):
+        print(f"  {r['_id']}: {r['total_cases']} cases")
