@@ -81,7 +81,7 @@ def get_disease_trend(disease, years=5):
         {"$sort": {"_id": -1}} # orders by year
     ]
 
-    return list(collection.aggregate(pipeline))  #???????????????? visualize this one
+    return list(collection.aggregate(pipeline))
 
 
 '''
