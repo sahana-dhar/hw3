@@ -93,7 +93,8 @@ def get_county_disease(county, num=3):
         {"location.county": county}
     )
     if not county_exists:
-        return "County not found!"
+        print("County not found!")
+        return list()
     
     # set up pipeline
     pipeline = [
@@ -113,7 +114,6 @@ def get_county_disease(county, num=3):
 
 
 if __name__ == "__main__":
-    # test methods
 
     print("Top 5 Counties Affected by Amebiasis Disease")
     for r in get_affected_counties("Amebiasis", 5):
@@ -123,6 +123,6 @@ if __name__ == "__main__":
     for r in get_disease_trend("Salmonellosis", 5):
         print(f"  {r['_id']}: {r['total_cases']} cases")
 
-    print("Top 5 Dieases in Alameda")
-    for r in get_county_disease("Alameda", 5):
+    print("Top 5 Dieases in Sacramento")
+    for r in get_county_disease("Sacramento", 5):
         print(f"  {r['_id']}: {r['total_cases']} cases")

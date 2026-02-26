@@ -28,3 +28,5 @@ def plot_disease_trend(disease, years=5):
 
 if __name__ == "__main__":
     plot_disease_trend("Salmonellosis", 10)
+
+    # see saved image "figure.png"
